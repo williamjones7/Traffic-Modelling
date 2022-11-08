@@ -8,7 +8,7 @@ class Car:
         self.distance_to_next = 0
     
     def __repr__(self):
-        return str(self.v)
+        return str(self.v)+' '+str(self.distance_to_next)
     
     def accelerate(self):
         if self.distance_to_next > self.v + 1:
@@ -49,25 +49,28 @@ class Road:
             if random.random() < self.density:
                 self.cars.append(Car(initial_position = position, initial_velocity = int(np.round(5*random.random()))))
             else:
-                self.cars.append(0)
+                self.cars.append(' ')
     
     def timestep(self):
         for position, car in enumerate(self.cars):
-            if car != 0:
-                distance_to_next = 1
-                for i in range(self.length - position):
-                    if self.cars[i] == 0:
-                        distance_to_next += 1
-                car.distance_to_next = distance_to_next
+            if car != ' ':
+                car.distance_to_next = 1
+                for i in range(1,self.length - position):
+                    if self.cars[position + i] == ' ':
+                        car.distance_to_next += 1
+                car.distance_to_next = car.distance_to_next
         
-        next_road = [0] * self.length
+        next_road = [' '] * self.length
         
         for position, car in enumerate(self.cars):
             # if not an empty slot
-            if car != 0:
+            if car != ' ':
                 car.change_speed(self.p)
-                if position < self.length:
+                if position + car.v < self.length:
                     next_road[position + car.v] = car
+                else:
+                    next_road[position] = ' '
         
         self.cars = next_road
+            
             
