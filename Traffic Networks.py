@@ -11,14 +11,22 @@ class Car:
         return str(self.v)
     
     def accelerate(self):
-        self.v += 1
+        if self.distance_to_next > self.v + 1:
+            self.v += 1
         
-    def decelerate(self, new_v):
-        self.v = new_v
+    def decelerate(self):
+        if self.v >= self.distance_to_next:
+            self.v = self.distance_to_next - 1
         
     def randomise(self, p):
         if self.v > 0 and random.random() < p:
-            self.v -= 1        
+            self.v -= 1  
+            
+    def change_speed(self, p):
+        self.accelerate()
+        self.decelerate()
+        self.randomise(p)
+    
     
     def move(self):
         self.position += self.v
@@ -45,12 +53,21 @@ class Road:
     
     def timestep(self):
         for position, car in enumerate(self.cars):
-            distance_to_next = 1
-            for i in range(self.length - position):
-                if self.cars[i] == 0:
-                    distance_to_next += 1
-            car.distance_to_next = distance_to_next
-            
+            if car != 0:
+                distance_to_next = 1
+                for i in range(self.length - position):
+                    if self.cars[i] == 0:
+                        distance_to_next += 1
+                car.distance_to_next = distance_to_next
+        
+        next_road = [0] * self.length
+        
         for position, car in enumerate(self.cars):
+            # if not an empty slot
+            if car != 0:
+                car.change_speed(self.p)
+                if position < self.length:
+                    next_road[position + car.v] = car
+        
+        self.cars = next_road
             
-        #car.distance_to_next
