@@ -59,6 +59,9 @@ class Road:
                 for i in range(1, self.length - position):
                     if self.cars[position + i] == ' ':
                         car.distance_to_next += 1
+                        # don't slow down if reaching the end of the road
+                        if position + i == self.length - 1:
+                            car.distance_to_next += self.v_max
                     else:
                         break
                 car.distance_to_next = car.distance_to_next
@@ -73,15 +76,13 @@ class Road:
                 car.change_speed(self.v_max, self.p)
                 car.move()
                 # think I need to add 1 here
-                if position + 1 + car.v < self.length:
+                if position + car.v < self.length:
                     next_road[position + car.v] = car
                 else:
                     next_road[position] = ' '
            
         # new car entering
-        if next_road[0] == ' ' and random.random() < 0.5:
+        if next_road[0] == ' ' and random.random() < self.density:
             next_road[0] = Car(initial_position = 0, initial_velocity = int(np.round(self.v_max*random.random())))
         
         self.cars = next_road
-            
-            
