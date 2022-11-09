@@ -54,6 +54,7 @@ class Road:
             if random.random() < self.density:
                 v_init = int(min(np.round(self.v_max*random.random()), distance_to_next))
                 self.cars[position] = Car(initial_position = position, initial_velocity = v_init)
+                distance_to_next = 0
             distance_to_next += 1
             position -= 1
 
@@ -93,5 +94,7 @@ class Road:
         
         self.cars = next_road
 
-road = Road(length=100, density=.1, p=.1, v_max=5)
+road = Road(length=20, density=.1, p=.1, v_max=5)
+print(road.cars)
+road.timestep()
 print(road.cars)
