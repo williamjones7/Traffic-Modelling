@@ -66,11 +66,11 @@ class Road:
                 for i in range(1, self.length - position):
                     if self.cars[position + i] == ' ':
                         car.distance_to_next += 1
-                        # don't slow down if reaching the end of the road
-                        if position + i == self.length - 1:
-                            car.distance_to_next += self.v_max
                     else:
                         break
+                if car.distance_to_next + position + 1 == self.length:
+                    car.distance_to_next = self.v_max 
+                    
                 car.distance_to_next = car.distance_to_next
         
         # making copy for new road
