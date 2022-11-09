@@ -45,12 +45,18 @@ class Road:
         return str(self.cars)
         
     def build_road(self):
-        for position in range(self.length):
+        distance_to_next = self.v_max + 1
+        position = self.length-1
+
+        self.cars = [' ' for L in range(self.length)]
+        
+        while 0 <= position:
             if random.random() < self.density:
-                self.cars.append(Car(initial_position = position, initial_velocity = int(np.round(self.v_max*random.random()))))
-            else:
-                self.cars.append(' ')
-    
+                v_init = int(min(np.round(self.v_max*random.random()), distance_to_next))
+                self.cars[position] = Car(initial_position = position, initial_velocity = v_init)
+            distance_to_next += 1
+            position -= 1
+
     def timestep(self):
         # assigning car distances
         for position, car in enumerate(self.cars):
@@ -86,3 +92,6 @@ class Road:
             next_road[0] = Car(initial_position = 0, initial_velocity = int(np.round(self.v_max*random.random())))
         
         self.cars = next_road
+
+road = Road(length=100, density=.1, p=.1, v_max=5)
+print(road.cars)
