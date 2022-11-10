@@ -57,36 +57,42 @@ class Road:
                 distance_to_next = 0
             distance_to_next += 1
             position -= 1
+            
+    def distance_to_next(self, car):
+        distance_to_next = 1
+        for i in range(1, self.length - car.position):
+            
+            if self.cars[car.position + i] == ' ':
+                distance_to_next += 1
+            else:
+                break
+            
+            if car.position + i == self.length - 1:
+                distance_to_next += self.v_max
+        
+        if car.position == self.length - 1:
+            distance_to_next += self.v_max
+            
+        car.distance_to_next = distance_to_next
 
     def timestep(self):
         # assigning car distances
-        for position, car in enumerate(self.cars):
+        for car in self.cars:
             if car != ' ':
-                car.distance_to_next = 1
-                for i in range(1, self.length - position):
-                    if self.cars[position + i] == ' ':
-                        car.distance_to_next += 1
-                    else:
-                        break
-                if car.distance_to_next + position + 1 == self.length:
-                    car.distance_to_next = self.v_max 
-                    
-                car.distance_to_next = car.distance_to_next
+                self.distance_to_next(car)
         
         # making copy for new road
         next_road = [' '] * self.length
         
         # move cars
-        for position, car in enumerate(self.cars):
+        for car in self.cars:
             # if not an empty slot
             if car != ' ':
                 car.change_speed(self.v_max, self.p)
                 car.move()
                 # think I need to add 1 here
-                if position + car.v < self.length:
-                    next_road[position + car.v] = car
-                else:
-                    next_road[position] = ' '
+                if car.position < self.length:
+                    next_road[car.position] = car
            
         # new car entering
         if next_road[0] == ' ' and random.random() < self.density:
@@ -94,7 +100,15 @@ class Road:
         
         self.cars = next_road
 
-road = Road(length=20, density=.1, p=.1, v_max=5)
+road = Road(length=18, density=.1, p=.1, v_max=5)
+print(road.cars)
+road.timestep()
+print(road.cars)
+road.timestep()
+print(road.cars)
+road.timestep()
+print(road.cars)
+road.timestep()
 print(road.cars)
 road.timestep()
 print(road.cars)
