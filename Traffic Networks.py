@@ -99,16 +99,47 @@ class Road:
             next_road[0] = Car(initial_position = 0, initial_velocity = int(np.round(self.v_max*random.random())))
         
         self.cars = next_road
+        
+    def road_to_values(self):
+        vals = []
+        for car in self.cars:
+            if car == ' ':
+                vals.append(-1)
+            else:
+                vals.append(car.v)
+        return vals
 
 road = Road(length=18, density=.1, p=.1, v_max=5)
 print(road.cars)
 road.timestep()
-print(road.cars)
-road.timestep()
-print(road.cars)
-road.timestep()
-print(road.cars)
-road.timestep()
-print(road.cars)
-road.timestep()
-print(road.cars)
+
+
+#Plotting
+
+import matplotlib.pyplot as plt
+
+t_vals = np.arange(101)
+
+my_road = Road(length = 200, density = .1, p = .1, v_max = 10)
+
+x_vals = []
+
+for t in t_vals:   
+    x_vals.append(my_road.road_to_values())
+    my_road.timestep()
+
+#generating coordinates
+coords = []
+
+for t in t_vals:
+    for p, x in enumerate(x_vals[t]):
+        if x != -1:
+            coords.append((t, p, x))
+       
+    
+import pandas as pd
+
+df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
+df.head()
+
+df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8 ), colormap = 'copper', s=30)
