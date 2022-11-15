@@ -1,5 +1,8 @@
 import random
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+import pandas as pd
 
 class Car:
     def __init__(self, initial_position, initial_velocity):
@@ -109,18 +112,11 @@ class Road:
                 vals.append(car.v)
         return vals
 
-road = Road(length=18, density=.1, p=.1, v_max=5)
-print(road.cars)
-road.timestep()
-
-
 #Plotting
-
-import matplotlib.pyplot as plt
 
 t_vals = np.arange(101)
 
-my_road = Road(length = 200, density = .1, p = .1, v_max = 10)
+my_road = Road(length = 500, density = .1, p = .1, v_max = 10)
 
 x_vals = []
 
@@ -135,11 +131,21 @@ for t in t_vals:
     for p, x in enumerate(x_vals[t]):
         if x != -1:
             coords.append((t, p, x))
-       
-    
-import pandas as pd
 
 df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
 df.head()
 
-df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8 ), colormap = 'copper', s=30)
+def animation_function(t):
+    plt.clf()
+    data = df.loc[df['t'] == t]
+    positions = data['p']
+    speeds = data['v']
+    plt.scatter(positions, np.zeros(len(speeds)), c = speeds, s = 30)
+    plt.xlim([0,500])
+
+fig = plt.figure(figsize=(8,4))
+anim = animation.FuncAnimation(fig, animation_function, frames = 100, interval = 1)
+
+#df.plot.scatter(x ='p', c ='v', figsize = (16,8 ), colormap = 'copper', s=30)
+
+plt.show()
