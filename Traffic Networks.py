@@ -116,7 +116,7 @@ class Road:
 
 t_vals = np.arange(101)
 
-my_road = Road(length = 500, density = .1, p = .1, v_max = 10)
+my_road = Road(length = 1000, density = .2, p = .1, v_max = 10)
 
 x_vals = []
 
@@ -143,7 +143,7 @@ def animation_function(t):
     plt.scatter(positions, np.zeros(len(speeds)), c = speeds, s = 30)
     plt.xlim([0,500])
 
-fig = plt.figure(figsize=(8,4))
+fig = plt.figure(figsize=(10,1))
 anim = animation.FuncAnimation(fig, animation_function, frames = 100, interval = 1)
 
 #df.plot.scatter(x ='p', c ='v', figsize = (16,8 ), colormap = 'copper', s=30)
