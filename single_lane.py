@@ -132,19 +132,19 @@ for t in t_vals:
         if x != -1:
             coords.append((t, p, x))
 
-df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
-df.head()
+# df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
+# df.head()
 
-def animation_function(t):
-    plt.clf()
-    data = df.loc[df['t'] == t]
-    positions = data['p']
-    speeds = data['v']
-    plt.scatter(positions, np.zeros(len(speeds)), c = speeds, s = 30)
-    plt.xlim([0,500])
+# def animation_function(t):
+#     plt.clf()
+#     data = df.loc[df['t'] == t]
+#     positions = data['p']
+#     speeds = data['v']
+#     plt.scatter(positions, np.zeros(len(speeds)), c = speeds, s = 30)
+#     plt.xlim([0,500])
 
-fig = plt.figure(figsize=(10,1))
-anim = animation.FuncAnimation(fig, animation_function, frames = 100, interval = 1)
+# fig = plt.figure(figsize=(10,1))
+# anim = animation.FuncAnimation(fig, animation_function, frames = 100, interval = 1)
 
 #df.plot.scatter(x ='p', c ='v', figsize = (16,8 ), colormap = 'copper', s=30)
 

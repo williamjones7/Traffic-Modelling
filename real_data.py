@@ -1,5 +1,6 @@
-from single_lane import *
+from single_lane import Road, Car
+import pandas as pd
 
-data = df.read_csv('dft_rawcount_local_authority_id_31.csv')
+data = pd.read_csv('dft_rawcount_local_authority_id_31.csv')
 
 print(data)
