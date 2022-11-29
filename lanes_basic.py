@@ -1,3 +1,7 @@
+import random 
+from single_lane import Car
+import numpy as np
+
 class Road:
     def __init__(self, length, density, p, v_max,no_lanes):
         self.length = length
