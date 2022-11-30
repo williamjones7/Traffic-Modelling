@@ -55,26 +55,29 @@ class Road:
             if g==self.no_lanes:
                 g= 0
             
-            distfg=1
-            distbg=1
+           
             for car in self.lanes[h]:
                 if car!= ' ' and car !='R':
+                    distfg=1
+                    distbg=1
                     disth = 1
                     for k in range(1,self.length-car.position):
                         if self.lanes[h][car.position+k]==' ':
                             disth += 1
                         else:
                             break
+                    for j in range(1,self.length-car.position):
                         if g!=9999 and self.lanes[g][car.position]==' ':
-                            if self.lanes[g][car.position+k]==' ':
+                            if self.lanes[g][car.position+j]==' ':
                                 distfg+=1
                             else:
                                 break
-                            for o in range(1,car.position):
-                                if self.lanes[g][car.position-o]==' ' or self.lanes[g][car.position-0]=='R':
-                                    distbg+=1
-                                else:
-                                    break
+                    for o in range(1,car.position):
+                        if g!=9999 and self.lanes[g][car.position]==' ':
+                            if self.lanes[g][car.position-o]==' ' or self.lanes[g][car.position-0]=='R':
+                                distbg+=1
+                            else:
+                                break
                     
 
                     if disth < distfg and distbg> self.v_max and car.position<self.length:
@@ -140,3 +143,5 @@ class Road:
                     vals3.append(car.v)
                 
         return vals1,vals2,vals3
+        
+        
