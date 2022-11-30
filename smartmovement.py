@@ -1,43 +1,9 @@
-import random
+import random 
+from single_lane import Car
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import animation
-import pandas as pd
 
-class Car:
-    def __init__(self, initial_position, initial_velocity,lane):
-        self.position = initial_position
-        self.v = initial_velocity
-        self.distance_to_next = 1
-        self.lane = lane
-    
-    def __repr__(self):
-        return 'V:'+str(self.v)+' P:'+str(self.position)
-    
-    def accelerate(self, v_max):
-        if self.distance_to_next > self.v + 1 and v_max > self.v:
-            self.v += 1
-        
-    def decelerate(self):
-        if self.v >= self.distance_to_next:
-            self.v = self.distance_to_next - 1
-        
-    def randomise(self, p):
-        if self.v > 0 and random.random() < p:
-            self.v -= 1  
-            
-    def change_speed(self, v_max, p):
-        self.accelerate(v_max)
-        self.decelerate()
-        self.randomise(p)
-    
-    
-    def move(self):
-        self.position += self.v
-        
-        
 class Road:
-    def __init__(self, length, density, p, v_max,no_lanes,roadworks):
+    def __init__(self, length, density, p, v_max, no_lanes, roadworks):
         self.length = length
         self.p = p
         self.density = density
@@ -45,7 +11,7 @@ class Road:
         self.lanes = []
         self.cars = []
         self.no_lanes = no_lanes
-        self.roadworks=roadworks
+        self.roadworks = roadworks
         self.build_road()
         
     def __repr__(self):
@@ -55,59 +21,49 @@ class Road:
         
     def build_road(self):
         
-        if self.roadworks == None:
-            distance_to_next = self.v_max+1
-            position = self.length-1 
-
-            self.lanes = np.zeros((self.no_lanes,self.length),dtype = object)
-            lane= [' ' for L in range(self.length)]
-
-            for i in range(0,self.no_lanes):
-                self.lanes[i]=lane
-
-
-
-            while 0<=position:
-                if random.random()<self.density:
-                    for i in range(0,self.no_lanes):
-                        v_init = int(min(np.round(self.v_max*random.random()),distance_to_next))
-
-                        self.lanes[i][position] = Car(initial_position = position, initial_velocity = v_init,lane=i)
-                        distance_to_next = 0
-                distance_to_next += 1
-                position -= 1
-                
         distance_to_next = self.v_max+1
-        position = self.length-1
-        self.lanes = np. zeros((self.no_lanes,self.length),dtype=object)
-        lane = [' ' for L in range(self.length)]
-        
+        position = self.length-1 
+
+        self.lanes = np.zeros((self.no_lanes,self.length),dtype = object)
+        lane= [' ' for L in range(self.length)]
+
         for i in range(0,self.no_lanes):
             self.lanes[i]=lane
-        
-        
+
+
+
+        while 0<=position:
+            if random.random()<self.density:
+                for i in range(0,self.no_lanes):
+                    v_init = int(min(np.round(self.v_max*random.random()),distance_to_next))
+
+                    self.lanes[i][position] = Car(initial_position = position, initial_velocity = v_init, lane=i)
+                    distance_to_next = 0
+            distance_to_next += 1
+            position -= 1
+                
         
         if self.roadworks != [0,0,0]:
             self.lanes[self.roadworks[0]][self.roadworks[1]:self.roadworks[2]] = '/'
         
     
     
-    def distance_to_next(self, car, lane):
-        distance_to_next =1 
+   # def distance_to_next(self, car, lane):
+        #distance_to_next =1 
         
-        for k in range(1,self.length-car.position):
-            if self.lanes[lane, car.position + k] == ' ':
-                distance_to_next +=1
-            else:
-                break
+        #for k in range(1,self.length-car.position):
+            #if self.lanes[lane, car.position + k] == ' ':
+                #distance_to_next +=1
+            #else:
+               # break
             
-            if car.position + k == self.length -1:
-                distance_to_next += self.v_max
+           # if car.position + k == self.length -1:
+                #distance_to_next += self.v_max
             
-        if car.position == self.length-1:
-            distance_to_next += self.v_max
+       # if car.position == self.length-1:
+            #distance_to_next += self.v_max
                 
-        car.distance_to_next = distance_to_next
+       # car.distance_to_next = distance_to_next
         
     def lane_distance_to_next(self,car,lane):
         lanedists = np.zeros(self.no_lanes)
@@ -125,11 +81,11 @@ class Road:
             if car.position == self.length-1:
                 lanedists[h]+= self.v_max
                 
-            car.distance_to_next = int(max(lanedists))
-            if np.argmax(lanedists) == lane:
-                car.lane = car.lane
-            else:
-                car.lane = int(np.argmax(lanedists))
+        car.distance_to_next = int(max(lanedists))
+        if np.argmax(lanedists) == lane:
+            car.lane = car.lane
+        else:
+            car.lane = int(np.argmax(lanedists))
     
     def timestep(self):
         #assign car distances
@@ -154,17 +110,18 @@ class Road:
                     laneswap[y][u] = 0
                 else:
                     laneswap[y][u]=1
+       # print(laneswap)
                 
             ### MOVEMENT
         for g in range(self.no_lanes):
-            for car in reversed(self.lanes[g]):
+            for car in (self.lanes[g]):
                 if car != ' ':
                     car.change_speed(self.v_max,self.p)
                     car.move()
                     op = int(car.position)
                     
                     if car.position < self.length and laneswap[g][op] == 1:
-                        next_lanes[g][int(car.position)]= car
+                        next_lanes[car.lane][int(car.position)]=car
                     elif car.position < self.length and laneswap[g][op]==0:
                         next_lanes[car.lane][int(car.position)] = car 
                         
