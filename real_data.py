@@ -1,11 +1,8 @@
-from LanechangingLEFTONLY import Road
-from single_lane import Car
-import random
+from multi_lanes.py import Car, Road
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import pandas as pd
-import seaborn as sns
 
 raw_data = pd.read_csv('Traffic-Modelling/Data/2014 TMU Site 1129.csv')
 
@@ -32,7 +29,7 @@ avg_speeds = []
 
 for flowrate in np.arange(1, 300, .25):
     density = flowrate / length
-    myroad = Road(length, density, .1, 31.2, 2, [0,0,0])
+    myroad = Road(length, density, .1, 31.2, 2)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
