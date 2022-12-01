@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import pandas as pd
+import seaborn as sns
 
 class Car:
     def __init__(self, initial_position, initial_velocity, number = None, initial_lane = 0):
@@ -197,65 +198,70 @@ class Road:
            
 # checking for a few timesteps
 
-road = Road(length=10,density=0.2,p=0.1,v_max = 5,no_lanes=2, roadworks=[1,7,9 ])
+# road = Road(length=10,density=0.2,p=0.1,v_max = 5,no_lanes=2, roadworks=[1,7,9 ])
 
-for i in range(5):
-    road.timestep()
-    print("Time: {}".format(road.time))
-    print(road.lanes[0])
-    print(road.lanes[1])
-    print()
+# for i in range(5):
+#     road.timestep()
+#     print("Time: {}".format(road.time))
+#     print(road.lanes[0])
+#     print(road.lanes[1])
+#     print()
     
-print(road.road_to_values())
+# print(road.road_to_values())
 
 
 # plots
 
 #import matplotlib.pylot as plt
-lanes = 2
-length = 300
-t_vals = np.arange(10000)
-roadworks = [0,100,150]
+# lanes = 2
+# length = 500
+# t_vals = np.arange(5000)
+# roadworks = [0,400,401]
 
-my_road = Road(length = length, density = 0.2, p = 0.1 , v_max = 5, no_lanes = lanes, roadworks = roadworks)
+# my_road = Road(length = length, density = 0.1, p = 0.1 , v_max = 5, no_lanes = lanes, roadworks = roadworks)
 
+# x_vals = np.zeros((lanes, length, len(t_vals)))
 
-x_vals = np.zeros((lanes, length, len(t_vals)))
+# for t in t_vals:   
+#     x_vals[:,:,t] = my_road.road_to_values()
+#     my_road.timestep()
 
-for t in t_vals:   
-    x_vals[:,:,t] = my_road.road_to_values()
-    my_road.timestep()
+# coords = []
 
-coords = []
-
-for l in range(lanes):
-    for t in t_vals: 
-        for p, v in enumerate(x_vals[l,:,t]):
-            if v != -1:
-                coords.append((l, t, p, v))
+# for l in range(lanes):
+#     for t in t_vals: 
+#         for p, v in enumerate(x_vals[l,:,t]):
+#             if v != -1:
+#                 coords.append((l, t, p, v))
             
-average_speed_by_position = np.zeros((lanes, length))
-count_by_position = np.full((lanes, length), 0.01)
+# average_speed_by_position = np.zeros((lanes, length))
+# count_by_position = np.full((lanes, length), 0.01)
 
-for coord in coords:
-    if coord[3] != -2:
-        average_speed_by_position[coord[0],coord[2]] += coord[3]
-        count_by_position[coord[0],coord[2]] += 1
+# for coord in coords:
+#     if coord[3] != -2:
+#         average_speed_by_position[coord[0],coord[2]] += coord[3]
+#         count_by_position[coord[0],coord[2]] += 1
     
-average_speed_by_position = average_speed_by_position/count_by_position
+# average_speed_by_position = average_speed_by_position/count_by_position
     
+# fig, ax = plt.subplots()
 
-fig, ax = plt.subplots()
+# # for l in range(lanes):
+# #     ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
 
-for l in range(lanes):
-    ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
-plt.legend()
-plt.show()
+# ax = sns.heatmap(average_speed_by_position)
+
+# plt.title('Heatmap of speeds for cars on a road with a roadblock at 300-301m in lane 0')
+# plt.xlabel('Road Position')
+# plt.ylabel('Lane')
+# plt.legend()
+# plt.show()
 
 
-import pandas as pd
 
-df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
+# import pandas as pd
 
-df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8), colormap = 'copper', s=5)      
+# df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
+
+# df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8), colormap = 'copper', s=5)      
           
