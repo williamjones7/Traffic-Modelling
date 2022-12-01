@@ -8,6 +8,7 @@ class Road:
         self.lanes = []
         self.cars = []
         self.no_lanes = no_lanes
+        self.timestepcounter =1 
         self.build_road()
         
     def __repr__(self):
@@ -44,47 +45,88 @@ class Road:
             
             
     def lanechanging(self):
+        self.timestepcounter += 1
         
         changed_lanes = self.lanes
         gapminus = self.v_max
         
-        for h in range(0,self.no_lanes):
-          
-            g = h+1 
-            
-            if g==self.no_lanes:
-                g= 0
-            
-           
-            for car in self.lanes[h]:
-                if car!= ' ' and car !='R':
-                    distfg=1
-                    distbg=1
-                    disth = 1
-                    for k in range(1,self.length-car.position):
-                        if self.lanes[h][car.position+k]==' ':
-                            disth += 1
-                        else:
-                            break
-                    for j in range(1,self.length-car.position):
-                        if g!=9999 and self.lanes[g][car.position]==' ':
-                            if self.lanes[g][car.position+j]==' ':
-                                distfg+=1
-                            else:
-                                break
-                    for o in range(1,car.position):
-                        if g!=9999 and self.lanes[g][car.position]==' ':
-                            if self.lanes[g][car.position-o]==' ' or self.lanes[g][car.position-0]=='R':
-                                distbg+=1
-                            else:
-                                break
-                    
+        if self.timestepcounter %2 ==0: 
+            for h in range(0,self.no_lanes):
 
-                    if disth < distfg and distbg> self.v_max and car.position<self.length:
-                        self.lanes[g][car.position]=car
-                        car.distance_to_next = distfg
-                    else:
-                        car.distance_to_next=disth
+                g = h+1 
+
+                if g==self.no_lanes:
+                    g=9999
+
+                for car in self.lanes[h]:
+                    if car!= ' ' and car !='R':
+                        distfg=1
+                        distbg=1
+                        disth = 1
+                        for k in range(1,self.length-car.position):
+                            if self.lanes[h][car.position+k]==' ':
+                                disth += 1
+                            else:
+                                break
+                        for j in range(1,self.length-car.position):
+                            if g!=9999 and self.lanes[g][car.position]==' ':
+                                if self.lanes[g][car.position+j]==' ':
+                                    distfg+=1
+                                else:
+                                    break
+                        for o in range(1,car.position):
+                            if g!=9999 and self.lanes[g][car.position]==' ':
+                                if self.lanes[g][car.position-o]==' ' or self.lanes[g][car.position-0]=='R':
+                                    distbg+=1
+                                else:
+                                    break
+
+
+                        if disth < distfg and distbg> self.v_max and car.position<self.length:
+                            self.lanes[g][car.position]=car
+                            car.distance_to_next = distfg
+                        else:
+                            car.distance_to_next=disth
+                            
+        if self.timestepcounter%2 != 0:
+            for h in range(0,self.no_lanes):
+
+                g = h-1 
+
+                if g==-1:
+                    g=9999
+
+
+                for car in self.lanes[h]:
+                    if car!= ' ' and car !='R':
+                        distfg=1
+                        distbg=1
+                        disth = 1
+                        for k in range(1,self.length-car.position):
+                            if self.lanes[h][car.position+k]==' ':
+                                disth += 1
+                            else:
+                                break
+                        for j in range(1,self.length-car.position):
+                            if g!=9999 and self.lanes[g][car.position]==' ':
+                                if self.lanes[g][car.position+j]==' ':
+                                    distfg+=1
+                                else:
+                                    break
+                        for o in range(1,car.position):
+                            if g!=9999 and self.lanes[g][car.position]==' ':
+                                if self.lanes[g][car.position-o]==' ' or self.lanes[g][car.position-0]=='R':
+                                    distbg+=1
+                                else:
+                                    break
+
+
+                        if disth < distfg and distbg> self.v_max and car.position<self.length:
+                            self.lanes[g][car.position]=car
+                            car.distance_to_next = distfg
+                        else:
+                            car.distance_to_next=disth
+                
             
     
     def timestep(self):
@@ -143,5 +185,4 @@ class Road:
                     vals3.append(car.v)
                 
         return vals1,vals2,vals3
-        
         

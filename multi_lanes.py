@@ -47,8 +47,9 @@ class Car:
     def move(self):
         self.position += self.v
         self.lane = self.next_lane
-        
-   
+      
+    
+    
 class Road:
     def __init__(self, length, density, p, v_max, no_lanes, roadworks = None):
         self.length = length
@@ -109,7 +110,7 @@ class Road:
         
         elif not forward:
             for i in range(1, car.position):
-                if self.lanes[lane][car.position - i] == ' ':
+                if self.lanes[lane][car.position - i] == ' ' or self.lanes[lane][car.position - i] == 'R':
                     distance_to_next += 1
                 else:
                     break
@@ -127,7 +128,7 @@ class Road:
     
     def new_cars(self):
         for i, lane in enumerate(self.lanes):                      
-            if lane[0]==' ' and random.random() < self.density *self.v_max:
+            if lane[0]==' ' and random.random() < self.density *self.v_max / 2:
                 self.num += 1
                 lane[0] = Car(initial_position = 0, initial_velocity = int(np.round(self.v_max*random.random())), number = self.num, initial_lane=i)
 
@@ -179,7 +180,7 @@ class Road:
         self.new_cars()
                   
         self.time += 1
-                                  
+    
                 
     def road_to_values(self):
         vals = np.full((self.no_lanes, self.length), -1)
@@ -195,6 +196,7 @@ class Road:
                 
         return vals
                         
+                                            
            
 # checking for a few timesteps
 
