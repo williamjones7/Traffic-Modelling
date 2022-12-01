@@ -49,7 +49,7 @@ class Car:
         self.lane = self.next_lane
       
     
-    
+   
 class Road:
     def __init__(self, length, density, p, v_max, no_lanes, roadworks = None):
         self.length = length
@@ -134,7 +134,11 @@ class Road:
 
     
     def timestep(self):
-        
+        # cars look to go left on even timesteps
+        left = False
+        if self.time % 2 == 0:
+            left = True
+            
         next_lanes = [[' ' for L in range(self.length)] for lane in range(self.no_lanes)]
         
         lane_index = list(range(self.no_lanes))
@@ -146,11 +150,20 @@ class Road:
         for i, lane in enumerate(self.lanes):
             for j, car in enumerate(lane):
                 if car != ' ' and car != 'R':
-                    # need to change for multilane!!!
-                    for neighbor_lane in [k for k in lane_index if abs(i-k) == 1]:
-                        car.forward_gap = self.distance_to_next(car = car, lane = neighbor_lane)
-                        car.backward_gap = self.distance_to_next(car = car, lane = neighbor_lane, forward = False)
-                        car.distance_to_next = self.distance_to_next(car = car, lane = i)
+                    # if the neighboring lane exists
+                    # left
+                    if left and i+1 < self.no_lanes:
+                        neighbor_lane = int(i+1)      
+                    # right
+                    elif not left and i-1 >= 0:
+                        neighbor_lane = int(i-1)
+                    
+                    else:
+                        neighbor_lane = i
+                        
+                    car.forward_gap = self.distance_to_next(car = car, lane = neighbor_lane)
+                    car.backward_gap = self.distance_to_next(car = car, lane = neighbor_lane, forward = False)
+                    car.distance_to_next = self.distance_to_next(car = car, lane = i)
                 
                     if car.distance_to_next < car.v and car.forward_gap > car.distance_to_next:
                         weight1 = 1
@@ -179,8 +192,8 @@ class Road:
         
         self.new_cars()
                   
-        self.time += 1
-    
+        self.time += 1        
+            
                 
     def road_to_values(self):
         vals = np.full((self.no_lanes, self.length), -1)
@@ -196,7 +209,8 @@ class Road:
                 
         return vals
                         
-                                            
+                        
+                                                 
            
 # checking for a few timesteps
 
