@@ -46,10 +46,10 @@ class Car:
     
     def move(self):
         self.position += self.v
-        self.lane = self.next_lane
-      
+        self.lane = self.next_lane                   
     
-   
+                        
+                        
 class Road:
     def __init__(self, length, density, p, v_max, no_lanes, roadworks = None):
         self.length = length
@@ -89,8 +89,8 @@ class Road:
                 position -= 1  
         
         if self.roadworks != None:
-        # need to correct this to habe multiple 'R'
-            self.lanes[self.roadworks[0]][self.roadworks[1]:self.roadworks[2]+1] = ['R']*abs(self.roadworks[1] - (self.roadworks[2]+1))
+            for roadworks in self.roadworks:
+                self.lanes[roadworks[0]][roadworks[1]:roadworks[2]+1] = ['R']*abs(roadworks[1] - (roadworks[2]+1))
             
       
     def distance_to_next(self, car, lane, forward = True):
@@ -144,7 +144,8 @@ class Road:
         lane_index = list(range(self.no_lanes))
             
         if self.roadworks != None:
-            next_lanes[self.roadworks[0]][self.roadworks[1]:self.roadworks[2]+1] = ['R']*abs(self.roadworks[1] - (self.roadworks[2]+1))
+            for roadworks in self.roadworks:
+                next_lanes[roadworks[0]][roadworks[1]:roadworks[2]+1] = ['R']*abs(roadworks[1] - (roadworks[2]+1))
             
         # a car is in position j of lane i 
         for i, lane in enumerate(self.lanes):
@@ -195,9 +196,10 @@ class Road:
         self.time += 1        
             
                 
-    def road_to_values(self):
+    def road_to_values(self, init_lane = False):
         vals = np.full((self.no_lanes, self.length), -1)
-
+        if init_lane:
+            init_lane_ = np.full((self.no_lanes, self.length), -1)
         for i, lane in enumerate(self.lanes):
             for j, car in enumerate(lane):
                 if car != ' ':
@@ -205,12 +207,13 @@ class Road:
                         vals[i,j] = -2
                     else:
                         vals[i,j] = car.v
-
+                        if init_lane:
+                            init_lane_[i,j] = car.initial_lane
+                        
+        if init_lane:
+            return vals, init_lane_
                 
-        return vals
-                        
-                        
-                                                 
+        return vals                                           
            
 # checking for a few timesteps
 
