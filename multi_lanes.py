@@ -89,8 +89,7 @@ class Road:
                 position -= 1  
         
         if self.roadworks != None:
-            for roadworks in self.roadworks:
-                self.lanes[roadworks[0]][roadworks[1]:roadworks[2]+1] = ['R']*abs(roadworks[1] - (roadworks[2]+1))
+            self.lanes[self.roadworks[0]][self.roadworks[1]:self.roadworks[2]+1] = ['R']*abs(self.roadworks[1] - (self.roadworks[2]+1))
             
       
     def distance_to_next(self, car, lane, forward = True):
@@ -144,8 +143,7 @@ class Road:
         lane_index = list(range(self.no_lanes))
             
         if self.roadworks != None:
-            for roadworks in self.roadworks:
-                next_lanes[roadworks[0]][roadworks[1]:roadworks[2]+1] = ['R']*abs(roadworks[1] - (roadworks[2]+1))
+            next_lanes[self.roadworks[0]][self.roadworks[1]:self.roadworks[2]+1] = ['R']*abs(self.roadworks[1] - (self.roadworks[2]+1))
             
         # a car is in position j of lane i 
         for i, lane in enumerate(self.lanes):
@@ -225,62 +223,65 @@ class Road:
 #     print(road.lanes[0])
 #     print(road.lanes[1])
 #     print()
-    
+
 # print(road.road_to_values())
 
 
 # plots
+lanes = 4
+length = 1000
+t_vals = np.arange(10000)
+roadworks = [0,400,600]
 
-#import matplotlib.pylot as plt
-# lanes = 2
-# length = 500
-# t_vals = np.arange(5000)
-# roadworks = [0,400,401]
+my_road = Road(length = length, density = 0.05, p = 0.1 , v_max = 31.3, no_lanes = lanes, roadworks=roadworks)
 
-# my_road = Road(length = length, density = 0.1, p = 0.1 , v_max = 5, no_lanes = lanes, roadworks = roadworks)
+x_vals = np.zeros((lanes, length, len(t_vals)))
 
-# x_vals = np.zeros((lanes, length, len(t_vals)))
+for t in t_vals:   
+    x_vals[:,:,t] = my_road.road_to_values()
+    my_road.timestep()
 
-# for t in t_vals:   
-#     x_vals[:,:,t] = my_road.road_to_values()
-#     my_road.timestep()
+coords = []
 
-# coords = []
+for l in range(lanes):
+    for t in t_vals: 
+        for p, v in enumerate(x_vals[l,:,t]):
+            if v != -1:
+                coords.append((l, t, p, v))
+    
+average_speed_by_position = np.zeros((lanes, length))
+count_by_position = np.full((lanes, length), 0.01)
+
+for coord in coords:
+    if coord[3] != -2:
+        average_speed_by_position[coord[0],coord[2]] += coord[3]
+        count_by_position[coord[0],coord[2]] += 1
+
+average_speed_by_position = average_speed_by_position/count_by_position
+average_speed_by_position[roadworks[0]][roadworks[1]:roadworks[2]] = -1
+
+fig, ax = plt.subplots(1, 1, figsize = (12, 2))
 
 # for l in range(lanes):
-#     for t in t_vals: 
-#         for p, v in enumerate(x_vals[l,:,t]):
-#             if v != -1:
-#                 coords.append((l, t, p, v))
-            
-# average_speed_by_position = np.zeros((lanes, length))
-# count_by_position = np.full((lanes, length), 0.01)
+#     ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
 
-# for coord in coords:
-#     if coord[3] != -2:
-#         average_speed_by_position[coord[0],coord[2]] += coord[3]
-#         count_by_position[coord[0],coord[2]] += 1
-    
-# average_speed_by_position = average_speed_by_position/count_by_position
-    
-# fig, ax = plt.subplots()
+ax = sns.heatmap(average_speed_by_position, cbar_kws={'label': 'Speed (m/s)'})
+ax = sns.heatmap(average_speed_by_position, mask= average_speed_by_position != -1, cmap='Greens', cbar = False)
 
-# # for l in range(lanes):
-# #     ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
+ticks = list(np.linspace(0, length, 21).astype('int64'))
+ax.set_xticks(ticks)
+ax.set_xticklabels(ticks)
 
-# ax = sns.heatmap(average_speed_by_position)
+#plt.title(f'Speeds of cars on a {length}m road with a roadblock at {roadworks[1]}-{roadworks[2]}m in lane {roadworks[0]}')
+plt.xlabel('Position on road')
+plt.ylabel('Lane')
+plt.legend()
+plt.show()
 
-# plt.title('Heatmap of speeds for cars on a road with a roadblock at 300-301m in lane 0')
-# plt.xlabel('Road Position')
-# plt.ylabel('Lane')
-# plt.legend()
-# plt.show()
-
-
+fig.savefig(f'{lanes}-Heatmap', bbox_inches = 'tight')
 
 # import pandas as pd
 
 # df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
 
 # df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8), colormap = 'copper', s=5)      
-          

@@ -4,12 +4,11 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
-%matplotlib notebook
 import pandas as pd
 
 
 class Car:
-    def __init__(self, initial_position, initial_velocity, max_acceleration = 4, max_deceleration = 4,
+    def __init__(self, initial_position, initial_velocity, max_acceleration = 3, max_deceleration = 5,
                  length = 4, number = 1, reaction_time = 0.75):
         self.position = initial_position
         self.a_max = max_acceleration
@@ -136,58 +135,107 @@ for i in range(10):
 # simulation + animation
 
 dt = 0.25
-length = 500
+length = 2240
 density = .3
 p_ = 0
-v_max = 20
+v_max = 27
 T = 200
 
 t_vals = np.arange(int(T/dt)+1)
 
-my_road = Road(length = length, density = density, p = p_, v_max = v_max, dt = dt)
+# my_road = Road(length = length, density = density, p = p_, v_max = v_max, dt = dt)
 
+# # x_vals = []
 
-x_vals = []
+# # for t in t_vals:   
+# #     x_vals.append(my_road.road_to_values())
+# #     my_road.timestep()
+    
+# #generating coordinates
+# coords = []
 
-for t in t_vals:   
-    x_vals.append(my_road.road_to_values())
-    my_road.timestep()
+# for t in t_vals:
+#     for p, v in enumerate(x_vals[t]):
+#         if v != -1:
+#             coords.append((t * dt, p * dt**2, v))
 
-#generating coordinates
-coords = []
+# df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
+# print(df['v'].mean())
 
-for t in t_vals:
-    for p, v in enumerate(x_vals[t]):
-        if v != -1:
-            coords.append((t * dt, p * dt**2, v))
+# from IPython import display
 
-df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
-print(df.tail())
+# def animation_function(t):
+#     plt.clf()
 
-from IPython import display
+#     data = df[df['t'] == t*dt]
 
-def animation_function(t):
-    plt.clf()
+#     ps = data['p']
+#     vs = data['v']
 
-    data = df[df['t'] == t*dt]
+#     plt.scatter(x = ps, y = np.zeros(len(vs)), c = vs)#, s = 30
+#     plt.title(f"Simulating with  $p = {p_}$, $t = {t*dt:.2f}$")
+#     plt.xlim([0,int(length)])
+#     plt.ylim([-0.01, 0.01])
 
-    ps = data['p']
-    vs = data['v']
+# fig = plt.figure(figsize=(8,1.6))
+# anim = animation.FuncAnimation(fig, animation_function, frames = int(T/dt), interval = 50)
 
-    plt.scatter(x = ps, y = np.zeros(len(vs)), c = vs)#, s = 30
-    plt.title(f"Simulating with  $p = {p_}$, $t = {t*dt:.2f}$")
-    plt.xlim([0,int(length)])
-    plt.ylim([-0.01, 0.01])
-
-fig = plt.figure(figsize=(8,1.6))
-anim = animation.FuncAnimation(fig, animation_function, frames = int(T/dt), interval = 50)
-
-# converting to an html5 video
-video = anim.to_html5_video()
+# # converting to an html5 video
+# video = anim.to_html5_video()
   
-# embedding for the video
-html = display.HTML(video)
+# # embedding for the video
+# html = display.HTML(video)
   
-# draw the animation
-display.display(html)
-plt.close()
+# # draw the animation
+# display.display(html)
+# plt.close()
+
+
+raw_data = pd.read_csv('Data/2014 TMU Site 3976 (AL3328).csv')
+
+raw_data[' Total Carriageway Flow'].replace('', np.nan, inplace=True)
+raw_data.dropna(subset=[' Total Carriageway Flow'], inplace=True)
+traffic_data = raw_data
+
+fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
+
+traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 30014795 (AL1850)', ax = ax)
+
+def avg(road):
+    speeds = []
+    for car in road.cars:
+        if car != None:
+            speeds.append(car.v)
+
+    if len(speeds) != 0:
+        return np.asarray(speeds).mean()
+
+    return 0
+
+flowrates = np.arange(1, 600, 1)
+avg_speeds = []
+
+for flowrate in flowrates:
+
+    dt = 1
+    length = 5
+    density = .3
+    p_ = 0
+    v_max = 27
+    T = 200
+    t_vals = np.arange(int(T/dt)+1)
+
+    density = flowrate / length
+    myroad = Road(5, density, 0, 27, .25)
+    print(myroad)
+    for t in t_vals:
+        myroad.timestep
+    avg_speeds.append(avg(myroad))
+
+#print(myroad)
+#print(avg_speeds)
+avg_speeds = np.asarray(avg_speeds)
+
+ax.scatter(flowrates, avg_speeds, color = 'Crimson', marker = '.', label = 'Simulated data')
+
+fig.savefig('Smart Drivers', bbox_inches = 'tight')
