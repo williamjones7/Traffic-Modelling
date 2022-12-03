@@ -1,0 +1,193 @@
+import random
+import numpy as np
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+%matplotlib notebook
+import pandas as pd
+
+
+class Car:
+    def __init__(self, initial_position, initial_velocity, max_acceleration = 4, max_deceleration = 4,
+                 length = 4, number = 1, reaction_time = 0.75):
+        self.position = initial_position
+        self.a_max = max_acceleration
+        self.a_min = max_deceleration
+        self.v = initial_velocity
+        self.length = length
+        self.number = number
+        self.reaction_time = reaction_time
+        self.distance_to_next = 1
+        self.next_speed = 9999
+        
+    
+    def __repr__(self):
+        return 'V:'+str(self.v)+' P:'+str(self.position)+' D:'+str(self.distance_to_next)
+    
+
+    def change_speed(self, v_max, p, dt):
+        n = np.trunc(self.next_speed / (self.a_min * dt))
+        m = np.trunc(self.v / (self.a_min * dt))
+        initial_speed = self.v
+        critical_speed = np.trunc(self.distance_to_next + n * dt * self.next_speed + dt**2 * self.a_min * n * m *(n+1) * (n-1)/(m*dt + self.reaction_time))
+        
+        # accelerate
+        if self.v < critical_speed and v_max > self.v:
+            self.v = min([self.v + dt * np.trunc((self.a_max + 1) * np.random.uniform()), v_max, critical_speed])
+        
+        # decelerate
+        elif self.v > critical_speed:
+            
+            self.v = max([self.v - dt * np.trunc((self.a_min + 1) * np.random.uniform()), critical_speed, 0])
+        
+        # randomise
+        if self.v >= self.a_min * dt and np.random.uniform() < p:
+            
+            self.v = max([self.v - dt * np.trunc((self.a_min + 1) * np.random.uniform()), initial_speed - self.a_min * dt, 0])
+            
+
+    def move(self, dt):
+        self.position += self.v * dt
+        
+        
+class Road:
+    def __init__(self, length, density, p, dt, v_max):
+        self.length = length
+        self.p = p
+        self.density = density
+        self.v_max = v_max
+        self.dt = dt
+        self.dx = dt**2
+        self.num_positions = int(self.length/self.dx)
+        self.cars = [None for i in range(self.num_positions)]
+        
+    def __repr__(self):
+        return str(self.cars)
+        
+    def average_v(self):
+        vs = [car.v for car in self.cars if car != None]
+        return np.array(vs).mean()
+            
+    def next_car(self, car):
+        distance_to_next = self.dx
+        position = int(car.position/self.dx)
+        for i in range(1, int(self.num_positions - position)):
+            
+            if self.cars[position + i] == None:
+                distance_to_next += self.dx
+            else:
+                car.next_speed = self.cars[position + i].v
+                distance_to_next -= self.cars[position + i].length
+                break
+            
+            if position + i == self.num_positions - 1:
+                distance_to_next += 999
+                car.next_speed = self.v_max
+        
+        if position == self.num_positions - 1:
+            distance_to_next += 999
+            car.next_speed = self.v_max
+            
+        car.distance_to_next = distance_to_next
+        
+        
+
+    def timestep(self):
+        # assigning car distances
+        for car in self.cars:
+            if car != None:
+                self.next_car(car)
+        
+        # making copy for new road
+        next_road = [None for i in range(self.num_positions)]
+        # move cars
+        for car in self.cars:
+            # if not an empty slot
+            if car != None:
+                car.change_speed(self.v_max, self.p, self.dt)
+                car.move(self.dt)
+                # think I need to add 1 here
+                if car.position < self.length:
+                    next_road[int(car.position/self.dx)] = car
+           
+        # new car entering
+        if next_road[0] == None and random.random() < self.density: #* self.average_v():
+            next_road[0] = Car(initial_position = 0, initial_velocity = 0)
+        
+        self.cars = next_road
+        
+    def road_to_values(self):
+        vals = []
+        for car in self.cars:
+            if car == None:
+                vals.append(-1)
+            else:
+                vals.append(car.v)
+        return vals
+
+# checking on small example
+road = Road(length=5, density=.3, p=0, v_max=5, dt = 0.5)
+for i in range(10):
+    print(road.road_to_values())
+    road.timestep()
+
+
+# simulation + animation
+
+dt = 0.25
+length = 500
+density = .3
+p_ = 0
+v_max = 20
+T = 200
+
+t_vals = np.arange(int(T/dt)+1)
+
+my_road = Road(length = length, density = density, p = p_, v_max = v_max, dt = dt)
+
+
+x_vals = []
+
+for t in t_vals:   
+    x_vals.append(my_road.road_to_values())
+    my_road.timestep()
+
+#generating coordinates
+coords = []
+
+for t in t_vals:
+    for p, v in enumerate(x_vals[t]):
+        if v != -1:
+            coords.append((t * dt, p * dt**2, v))
+
+df = pd.DataFrame(data = coords, columns = ['t', 'p', 'v'])
+print(df.tail())
+
+from IPython import display
+
+def animation_function(t):
+    plt.clf()
+
+    data = df[df['t'] == t*dt]
+
+    ps = data['p']
+    vs = data['v']
+
+    plt.scatter(x = ps, y = np.zeros(len(vs)), c = vs)#, s = 30
+    plt.title(f"Simulating with  $p = {p_}$, $t = {t*dt:.2f}$")
+    plt.xlim([0,int(length)])
+    plt.ylim([-0.01, 0.01])
+
+fig = plt.figure(figsize=(8,1.6))
+anim = animation.FuncAnimation(fig, animation_function, frames = int(T/dt), interval = 50)
+
+# converting to an html5 video
+video = anim.to_html5_video()
+  
+# embedding for the video
+html = display.HTML(video)
+  
+# draw the animation
+display.display(html)
+plt.close()
