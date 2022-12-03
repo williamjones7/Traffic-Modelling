@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import pandas as pd
 
-raw_data = pd.read_csv('Data/2014 TMU Site 30014795 (AL1850).csv')
+raw_data = pd.read_csv('Data/2014 TMU Site 9545 (LM297).csv')
 
 raw_data[' Total Carriageway Flow'].replace('', np.nan, inplace=True)
 raw_data.dropna(subset=[' Total Carriageway Flow'], inplace=True)
@@ -12,9 +12,9 @@ traffic_data = raw_data
 
 fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
 
-traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 30014795 (AL1850)', ax = ax)
+traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 9545 (LM297)', ax = ax)
 
-length = 16760 
+length = 9360
 Nsteps = 200
 
 def avg_speed(road):
@@ -28,12 +28,12 @@ def avg_speed(road):
         avg = sum_v/num_cars
     return avg * 3.6 
     
-flowrates = np.arange(1, 1000, 1)
+flowrates = np.arange(1, 1750, 1)
 avg_speeds = []
-
+lanes = 4
 for flowrate in flowrates:
-    density = flowrate / length
-    myroad = Road(length, density, .1, 31.2, 2)
+    density = flowrate / (length * lanes)
+    myroad = Road(length, density, .1, 31.2, 4)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
@@ -43,8 +43,8 @@ scale = 2
 length = length * scale
 avg_speeds_scaled = []
 for flowrate in flowrates:
-    density = flowrate / length 
-    myroad = Road(length, density, .1, 31.2, 2)
+    density = flowrate / (length * lanes)
+    myroad = Road(length, density, .1, 31.2, 4)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
@@ -78,10 +78,10 @@ a, b = np.polyfit(flowrates, avg_speeds_scaled, 1)
 #add line of best fit to plot
 ax.plot(flowrates, a*np.asarray(flowrates)+b, linestyle = ':', color = 'yellow', label = 'Line of best fit, scaled simulated data')
 
-#plt.title('A31 between the M27 J1 and the A338', fontsize = 15)
+#plt.title('M25 between J9 and J10', fontsize = 15)
 plt.xlabel('Number of Cars on Road', fontsize = 15)
 plt.ylabel('Average Speed of Cars (km/h)', fontsize = 15)
 ax.legend()
 
-fig.savefig('2-lane data', bbox_inches = 'tight')
+fig.savefig('Motorway data', bbox_inches = 'tight')
 
