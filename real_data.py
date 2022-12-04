@@ -1,8 +1,12 @@
 from multi_lanes import Car, Road
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
+from matplotlib import animation, rc
 import pandas as pd
+
+# change the text format same as in the report
+rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman'],'size':30})
+rc('text', usetex=True)
 
 raw_data = pd.read_csv('Data/2014 TMU Site 30014795 (AL1850).csv')
 
@@ -10,7 +14,7 @@ raw_data[' Total Carriageway Flow'].replace('', np.nan, inplace=True)
 raw_data.dropna(subset=[' Total Carriageway Flow'], inplace=True)
 traffic_data = raw_data
 
-fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
+fig, ax = plt.subplots(1, 1, figsize = (15, 14), dpi = 200)
 
 traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 30014795 (AL1850)', ax = ax)
 
@@ -78,10 +82,11 @@ a, b = np.polyfit(flowrates, avg_speeds_scaled, 1)
 #add line of best fit to plot
 ax.plot(flowrates, a*np.asarray(flowrates)+b, linestyle = ':', color = 'yellow', label = 'Line of best fit, scaled simulated data')
 
-#plt.title('A31 between the M27 J1 and the A338', fontsize = 15)
-plt.xlabel('Number of Cars on Road', fontsize = 15)
-plt.ylabel('Average Speed of Cars (km/h)', fontsize = 15)
-ax.legend()
+#plt.title('A31 between the M27 J1 and the A338')
+# plt.xlabel('Number of Cars on Road', fontsize=70)
+plt.xlabel('Number of Cars on Road', fontsize=70)
+plt.ylabel('Average Speed of Cars (km/h)', fontsize=70)
+plt.legend()
 
-fig.savefig('2-lane data', bbox_inches = 'tight')
+fig.savefig('fig/2-lane data.pdf', format='pdf', bbox_inches = 'tight')
 
