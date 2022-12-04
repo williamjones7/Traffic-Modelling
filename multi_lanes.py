@@ -1,4 +1,8 @@
-# only works for 2 lanes at the moment but could be extended
+from matplotlib import rc
+
+# change the text format same as in the report
+rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman'],'size':30})
+rc('text', usetex=True)
 
 import random
 import numpy as np
@@ -260,25 +264,34 @@ for coord in coords:
 average_speed_by_position = average_speed_by_position/count_by_position
 average_speed_by_position[roadworks[0]][roadworks[1]:roadworks[2]] = -1
 
-fig, ax = plt.subplots(1, 1, figsize = (12, 2))
+fig, ax = plt.subplots(1, 1, figsize = (24, 6))
 
 # for l in range(lanes):
 #     ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
 
-ax = sns.heatmap(average_speed_by_position, cbar_kws={'label': 'Speed (m/s)'})
-ax = sns.heatmap(average_speed_by_position, mask= average_speed_by_position != -1, cmap='Greens', cbar = False)
+ticks_x = np.arange(0, length + 50, 50)
+ticks_y = [1, 2, 3, 4]
+ax = sns.heatmap(average_speed_by_position, cbar_kws={'label': 'Speed (m/s)'}, yticklabels=ticks_y)
+ax = sns.heatmap(
+    average_speed_by_position, 
+    mask= average_speed_by_position != -1, 
+    cmap='Greens', 
+    cbar = False,
+    yticklabels=ticks_y)
 
-ticks = list(np.linspace(0, length, 21).astype('int64'))
-ax.set_xticks(ticks)
-ax.set_xticklabels(ticks)
+ax.text(500, 0.5, 'ROADWORK', color='red', fontsize=30, horizontalalignment='center', fontweight='bold')
+
+ticks_x = range(0, length + 50, 50)
+ax.set_xticks(ticks_x)
+ax.set_xticklabels(ticks_x)
+plt.setp(ax.get_xticklabels(), rotation=0)
+plt.setp(ax.get_yticklabels(), rotation=0)
 
 #plt.title(f'Speeds of cars on a {length}m road with a roadblock at {roadworks[1]}-{roadworks[2]}m in lane {roadworks[0]}')
 plt.xlabel('Position on road')
 plt.ylabel('Lane')
-plt.legend()
-plt.show()
 
-fig.savefig(f'{lanes}-Heatmap', bbox_inches = 'tight')
+fig.savefig(f'{lanes}-Heatmap.pdf', format='pdf', bbox_inches = 'tight')
 
 # import pandas as pd
 
