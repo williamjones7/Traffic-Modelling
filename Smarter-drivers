@@ -4,6 +4,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
+%matplotlib notebook
 import pandas as pd
 
 
@@ -27,10 +28,10 @@ class Car:
 
     def change_speed(self, v_max, p, dt):
         n = np.trunc(self.next_speed / (self.a_min * dt))
-        m = np.trunc(self.v / (self.a_min * dt))
+        m = np.trunc(self.v / (self.a_min * dt)+1)
         initial_speed = self.v
-        critical_speed = np.trunc(self.distance_to_next + n * dt * self.next_speed + dt**2 * self.a_min * n * m *(n+1) * (n-1)/(m*dt + self.reaction_time))
-        
+        critical_speed = np.trunc((self.distance_to_next + n * dt * self.next_speed + dt**2 * self.a_min * (n*(n+1) - m* (m+1)))/(1 + (m+1)*dt + self.reaction_time))
+        #critical_speed = np.trunc((np.sqrt(self.reaction_time**2 * self.a_min**2 + self.next_speed**2) - self.a_min * self.reaction_time)/dt**2)*dt**2
         # accelerate
         if self.v < critical_speed and v_max > self.v:
             self.v = min([self.v + dt * np.trunc((self.a_max + 1) * np.random.uniform()), v_max, critical_speed])
@@ -60,12 +61,20 @@ class Road:
         self.dx = dt**2
         self.num_positions = int(self.length/self.dx)
         self.cars = [None for i in range(self.num_positions)]
+        self.count = 0
+        for i,car in enumerate(self.cars):
+            self.count+=1
+            if self.density * self.dx > random.random() and self.count > 10/self.dx:
+                self.cars[i] = Car(initial_position = i*self.dx, initial_velocity = 0.5)
+                self.count = 0
         
     def __repr__(self):
         return str(self.cars)
         
     def average_v(self):
         vs = [car.v for car in self.cars if car != None]
+        if len(vs) == 0:
+            return
         return np.array(vs).mean()
             
     def next_car(self, car):
@@ -111,8 +120,8 @@ class Road:
                     next_road[int(car.position/self.dx)] = car
            
         # new car entering
-        if next_road[0] == None and random.random() < self.density: #* self.average_v():
-            next_road[0] = Car(initial_position = 0, initial_velocity = 0)
+        if next_road[0] == None and random.random() < self.density*v_max*dt: #* self.average_v():
+            next_road[0] = Car(initial_position = 0, initial_velocity = 1)
         
         self.cars = next_road
         
@@ -124,6 +133,14 @@ class Road:
             else:
                 vals.append(car.v)
         return vals
+
+road = Road(length=15, density=.3, p=0, v_max=5, dt = 1)
+for i in range(10):
+    print(road)
+#     print(road.average_v())
+    road.timestep()
+    
+
 
 # checking on small example
 road = Road(length=5, density=.3, p=0, v_max=5, dt = 0.5)
