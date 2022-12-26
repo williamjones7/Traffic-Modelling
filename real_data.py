@@ -14,8 +14,12 @@ fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
 
 traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 30014795 (AL1850)', ax = ax)
 
-length = 16760 
+length = 16760
+v_max = 5
 Nsteps = 200
+site_len = 7.5
+
+length = int(length / site_len)
 
 def avg_speed(road):
     num_cars, sum_v, avg = 0,0,0
@@ -26,14 +30,14 @@ def avg_speed(road):
                 sum_v += car.v
     if num_cars > 0:
         avg = sum_v/num_cars
-    return avg * 3.6 
+    return avg 
     
 flowrates = np.arange(1, 1000, 1)
 avg_speeds = []
 
 for flowrate in flowrates:
     density = flowrate / length
-    myroad = Road(length, density, .1, 31.2, 2)
+    myroad = Road(length, density, .1, v_max, 2)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
@@ -44,16 +48,16 @@ length = length * scale
 avg_speeds_scaled = []
 for flowrate in flowrates:
     density = flowrate / length 
-    myroad = Road(length, density, .1, 31.2, 2)
+    myroad = Road(length, density, .1, v_max, 2)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
     avg_speeds_scaled.append(avg_speed(myroad))
 
 
-avg_speeds = np.asarray(avg_speeds)
+avg_speeds = np.asarray(avg_speeds) * 3.6 * site_len
 # avg_speeds_scaled = avg_speeds + 55
-avg_speeds_scaled = np.asarray(avg_speeds_scaled) * scale
+avg_speeds_scaled = np.asarray(avg_speeds_scaled) * scale * 3.6 * site_len
 
 ax.scatter(flowrates, avg_speeds, color = 'Green', marker = '.', label = 'Simulated data, unscaled')
 

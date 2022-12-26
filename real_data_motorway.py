@@ -15,7 +15,13 @@ fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
 traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 9545 (LM297)', ax = ax)
 
 length = 9360
+v_max = 31.2
 Nsteps = 200
+site_len = 7.5
+
+length = int(length / site_len)
+v_max = v_max / site_len
+
 
 def avg_speed(road):
     num_cars, sum_v, avg = 0,0,0
@@ -30,21 +36,21 @@ def avg_speed(road):
     
 flowrates = np.arange(1, 1750, 1)
 avg_speeds = []
-lanes = 4
+numlanes = 4
 for flowrate in flowrates:
-    density = flowrate / (length * lanes)
-    myroad = Road(length, density, .1, 31.2, 4)
+    density = flowrate / (length * numlanes)
+    myroad = Road(length, density, .1, v_max = 31.2, no_lanes = numlanes)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
     avg_speeds.append(avg_speed(myroad))
 
 scale = 2
-length = length * scale
+length = int(length * scale)
 avg_speeds_scaled = []
 for flowrate in flowrates:
-    density = flowrate / (length * lanes)
-    myroad = Road(length, density, .1, 31.2, 4)
+    density = flowrate / (length * numlanes)
+    myroad = Road(length, density, .1, v_max = 31.2, no_lanes = numlanes)
     total = 0
     for t in range(Nsteps):
         myroad.timestep
