@@ -1,9 +1,5 @@
-import random 
-from single_lane import Car
-import numpy as np
-
 class Road:
-    def __init__(self, length, density, p, v_max, no_lanes, roadworks):
+    def __init__(self, length, density, p, v_max,no_lanes,roadworks):
         self.length = length
         self.p = p
         self.density = density
@@ -11,7 +7,7 @@ class Road:
         self.lanes = []
         self.cars = []
         self.no_lanes = no_lanes
-        self.roadworks = roadworks
+        self.roadworks=roadworks
         self.build_road()
         
     def __repr__(self):
