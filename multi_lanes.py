@@ -1,10 +1,14 @@
+
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import animation
+from matplotlib import animation, rc
 import pandas as pd
 import seaborn as sns
+
+# change the text format same as in the report
+rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman'],'size':30})
+rc('text', usetex=True)
 
 class Car:
     def __init__(self, initial_position, initial_velocity, number = None, initial_lane = 0):
@@ -214,205 +218,86 @@ class Road:
                 
         return vals                                           
            
-# checking for a few timesteps
 
-# road = Road(length=10,density=0.2,p=0.1,v_max = 5,no_lanes=2, roadworks=[1,7,9 ])
+if __name__ == '__main__':  # to prevent plotting graphs for every use of class above
+    # checking for a few timesteps
 
-# for i in range(5):
-#     road.timestep()
-#     print("Time: {}".format(road.time))
-#     print(road.lanes[0])
-#     print(road.lanes[1])
-#     print()
+    # road = Road(length=10,density=0.2,p=0.1,v_max = 5,no_lanes=2, roadworks=[1,7,9])
 
-# print(road.road_to_values())
+    # for i in range(5):
+    #     road.timestep()
+    #     print("Time: {}".format(road.time))
+    #     print(road.lanes[0])
+    #     print(road.lanes[1])
+    #     print()
 
+    # print(road.road_to_values())
+    # plots
+    lanes = 4
+    length = 1000
+    t_vals = np.arange(10000)
+    roadworks = [0,400,600]
 
-#plots
-lanes = 2
-real_length = 1000
-length = int(real_length / 7.5)
-t_vals = np.arange(200)
-roadworks = None
+    my_road = Road(length = length, density = 0.05, p = 0.1 , v_max = 31.3, no_lanes = lanes, roadworks=roadworks)
 
-my_road = Road(length = length, density = 0.2, p = 0.3 , v_max = 5, no_lanes = lanes, roadworks=roadworks)
+    x_vals = np.zeros((lanes, length, len(t_vals)))
 
-x_vals = np.zeros((lanes, length, len(t_vals)))
+    for t in t_vals:   
+        x_vals[:,:,t] = my_road.road_to_values()
+        my_road.timestep()
 
-for t in t_vals:   
-    x_vals[:,:,t] = my_road.road_to_values()
-    my_road.timestep()
+    coords = []
 
-coords = []
+    for l in range(lanes):
+        for t in t_vals: 
+            for p, v in enumerate(x_vals[l,:,t]):
+                if v != -1:
+                    coords.append((l, t, p, v))
+        
+    average_speed_by_position = np.zeros((lanes, length))
+    count_by_position = np.full((lanes, length), 0.01)
 
-for l in range(lanes):
-    for t in t_vals: 
-        for p, v in enumerate(x_vals[l,:,t]):
-            if v != -1:
-                coords.append((l, t, p, v))
-    
-# average_speed_by_position = np.zeros((lanes, length))
-# count_by_position = np.full((lanes, length), 0.01)
+    for coord in coords:
+        if coord[3] != -2:
+            average_speed_by_position[coord[0],coord[2]] += coord[3]
+            count_by_position[coord[0],coord[2]] += 1
 
-# for coord in coords:
-#     if coord[3] != -2:
-#         average_speed_by_position[coord[0],coord[2]] += coord[3]
-#         count_by_position[coord[0],coord[2]] += 1
+    average_speed_by_position = average_speed_by_position/count_by_position
+    average_speed_by_position[roadworks[0]][roadworks[1]:roadworks[2]] = -1
 
-# average_speed_by_position = average_speed_by_position/count_by_position
-# for i in roadworks[0]:
-#     average_speed_by_position[i][roadworks[1]:roadworks[2]] = -1
+    fig, ax = plt.subplots(1, 1, figsize = (24, 6))
 
-# fig, ax = plt.subplots(1, 1, figsize = (10, 1))
+    # for l in range(lanes):
+    #     ax.plot(range(len(average_speed_by_position[l])), average_speed_by_position[l], label = "lane {}".format(l))
 
+    ticks_x = np.arange(0, length + 50, 50)
+    ticks_y = [1, 2, 3, 4]
+    ax = sns.heatmap(average_speed_by_position, cbar_kws={'label': 'Speed (m/s)'}, yticklabels=ticks_y)
+    ax = sns.heatmap(
+        average_speed_by_position, 
+        mask= average_speed_by_position != -1, 
+        cmap='Greens', 
+        cbar = False,
+        yticklabels=ticks_y)
 
-# ax = sns.heatmap(np.asarray(average_speed_by_position) * 7.5, cbar_kws={'label': 'Speed (m/s)'})
-# ax = sns.heatmap(average_speed_by_position, mask= average_speed_by_position != -1, cmap='cool', cbar = False)
+    ax.text(500, 0.5, 'ROADWORK', color='red', fontsize=30, horizontalalignment='center', fontweight='bold')
 
-# ticks = list(np.linspace(0, length , 21).astype('int64'))
-# tick_labels = list(np.linspace(0, real_length , 21).astype('int64'))
-# ax.set_xticks([])
+    ticks_x = range(0, length + 50, 50)
+    ax.set_xticks(ticks_x)
+    ax.set_xticklabels(ticks_x)
+    plt.setp(ax.get_xticklabels(), rotation=0)
+    plt.setp(ax.get_yticklabels(), rotation=0)
 
-# plt.xlabel('Position on road')
-# plt.ylabel('Lane')
-# plt.legend()
-# plt.show()
+    #plt.title(f'Speeds of cars on a {length}m road with a roadblock at {roadworks[1]}-{roadworks[2]}m in lane {roadworks[0]}')
+    plt.xlabel('Position on road')
+    plt.ylabel('Lane')
 
-# fig.savefig(f'{lanes}-Heatmap', bbox_inches = 'tight')
+    fig.savefig(f'{lanes}-Heatmap.pdf', format='pdf', bbox_inches = 'tight')
 
-import pandas as pd
+    # import pandas as pd
 
-fig, ax = plt.subplots(1, 3, figsize = (20, 5))
+    # df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
 
-df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
-df['p'] = 7.5 * df['p']
-df['v'] = 7.5 * df['v']
-
-df2 = df[df['l'] == 0]
-ax[1] = df2.plot.scatter(x ='p', y='t', c ='v', s=5, ax = ax[1], cmap = 'rocket', colorbar = False)      
-
-df3 = df[df['l'] == 1]
-ax[2] = df3.plot.scatter(x ='p', y='t', c ='v', s=5, ax = ax[2], cmap = 'rocket', colorbar = False)      
-
-fig.subplots_adjust(right = 0.82)
-cmap = 'rocket'
-norm = mpl.colors.Normalize(vmin=0, vmax=df['v'].max())
-cbar_ax = fig.add_axes([0.85, 0.1, 0.02, 0.775])
-fig.colorbar(mpl.cm.ScalarMappable(norm = norm, cmap = cmap), cax = cbar_ax, label = 'Speed, m/s')
-
-lanes = 1
-real_length = 1000
-length = int(real_length / 7.5)
-t_vals = np.arange(200)
-roadworks = None
-
-my_road = Road(length = length, density = 0.4, p = 0.3 , v_max = 5, no_lanes = lanes, roadworks=roadworks)
-
-x_vals = np.zeros((lanes, length, len(t_vals)))
-
-for t in t_vals:   
-    x_vals[:,:,t] = my_road.road_to_values()
-    my_road.timestep()
-
-coords = []
-
-for l in range(lanes):
-    for t in t_vals: 
-        for p, v in enumerate(x_vals[l,:,t]):
-            if v != -1:
-                coords.append((l, t, p, v))
-
-df = pd.DataFrame(data = coords, columns = ['l', 't', 'p', 'v'])
-df['p'] = 7.5 * df['p']
-df['v'] = 7.5 * df['v']
-
-df = df[df['l'] == 0]
-ax[0] = df.plot.scatter(x ='p', y='t', c ='v', s=5, ax = ax[0], cmap = 'rocket', colorbar = False)
-
-ax[0].set_xlabel('Position, m')
-ax[1].set_xlabel('Position, m')
-ax[2].set_xlabel('Position, m')
-
-ax[0].set_ylabel('Time, seconds')
-ax[1].set_ylabel('Time, seconds')
-ax[2].set_ylabel('Time, seconds')
-
-ax[0].set_title('One Lane Road', fontsize = 18)
-ax[1].set_title('Two Lane Road, Lane 0', fontsize = 18)
-ax[2].set_title('Two Lane Road, Lane 1', fontsize = 18)
-
-fig.savefig(f'Two-lane Diagram', bbox_inches = 'tight')
-
-
-# lanes = 2
-# length = 3219 
-# t_vals = np.arange(100)
-# roadworks = [0,500,100]
-# scale = 5
-# length = length * scale
-# roadworks = roadworks * scale
-
-# raw_counts = pd.read_csv('Data/dft_rawcount_local_authority_id_31.csv')
-
-# m90data = raw_counts[raw_counts['road_name'] == 'M90']
-# flows = m90data['all_motor_vehicles']
-# densities = flows / length 
-
-
-# fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
-
-# Nsteps = 200
-
-# def avg_speed(road):
-#     num_cars, sum_v, avg = 0,0,0
-#     for lane in road.lanes:
-#         for car in lane:
-#             if car != ' ' and car != 'R':
-#                 num_cars += 1
-#                 sum_v += car.v
-#     if num_cars > 0:
-#         avg = sum_v/num_cars
-#     return avg * 3.6
-    
-# avg_speeds = []
-
-# for density in densities:
-#     myroad = Road(length, density, .1, 31.2, 2)
-#     for t in range(Nsteps):
-#         myroad.timestep
-#     avg_speeds.append(avg_speed(myroad))
-
-# avg_speeds_scaled = []
-# for density in densities:
-#     myroad = Road(length, density, .1, 31.2, 2, roadworks= roadworks)
-#     for t in range(Nsteps):
-#         myroad.timestep
-#     avg_speeds_scaled.append(avg_speed(myroad))
-
-
-# avg_speeds = np.asarray(avg_speeds) * scale
-# # avg_speeds_scaled = avg_speeds + 55
-# avg_speeds_scaled = np.asarray(avg_speeds_scaled) * scale
-
-# ax.scatter(flows, avg_speeds, color = 'Green', marker = '.', label = 'No Roadworks')
-
-# ax.scatter(flows, avg_speeds_scaled, color = 'Crimson', marker = '.', label = 'Roadworks at 500-100m')
-
-# #find line of best fit
-# a, b = np.polyfit(flows, avg_speeds, 1)
-
-# #add line of best fit to plot
-# ax.plot(flows, a*flows+b, linestyle = ':', color = 'lawngreen', label = 'Line of best fit, no roadworks')
-
-# #find line of best fit
-# a, b = np.polyfit(flows, avg_speeds_scaled, 1)
-
-# #add line of best fit to plot
-# ax.plot(flows, a*np.asarray(flows)+b, linestyle = ':', color = 'yellow', label = 'Line of best fit, roadworks')
-
-# plt.title('A31 between the M27 J1 and the A338', fontsize = 15)
-# plt.xlabel('Number of Cars on Road', fontsize = 15)
-# plt.ylabel('Average Speed of Cars (km/h)', fontsize = 15)
-# ax.legend()
+    # df.plot.scatter(x ='p', y='t', c ='v', figsize = (16,8), colormap = 'copper', s=5)      
 
 # fig.savefig('M90 data', bbox_inches = 'tight')

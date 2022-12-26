@@ -1,8 +1,12 @@
 from multi_lanes import Car, Road
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
+from matplotlib import animation, rc
 import pandas as pd
+
+# change the text format same as in the report
+rc('font',**{'family':'sans-serif','sans-serif':['Computer Modern Roman'],'size':30})
+rc('text', usetex=True)
 
 raw_data = pd.read_csv('Data/2014 TMU Site 9545 (LM297).csv')
 
@@ -10,7 +14,7 @@ raw_data[' Total Carriageway Flow'].replace('', np.nan, inplace=True)
 raw_data.dropna(subset=[' Total Carriageway Flow'], inplace=True)
 traffic_data = raw_data
 
-fig, ax = plt.subplots(1, 1, figsize = (7,7), dpi = 200)
+fig, ax = plt.subplots(1, 1, figsize = (15, 15), dpi = 200)
 
 traffic_data.plot.scatter(x = ' Total Carriageway Flow', y = ' Speed Value', marker = '.', color = 'Navy', label = '2014 TMU Site 9545 (LM297)', ax = ax)
 
@@ -33,8 +37,10 @@ def avg_speed(road):
     if num_cars > 0:
         avg = sum_v/num_cars
     return avg * 3.6 
-    
-flowrates = np.arange(1, 1750, 1)
+
+# set the upper bound of the flow rate    
+upper = traffic_data[' Total Carriageway Flow'].max()    
+flowrates = np.arange(1, upper, 1)
 avg_speeds = []
 numlanes = 4
 for flowrate in flowrates:
@@ -84,10 +90,10 @@ a, b = np.polyfit(flowrates, avg_speeds_scaled, 1)
 #add line of best fit to plot
 ax.plot(flowrates, a*np.asarray(flowrates)+b, linestyle = ':', color = 'yellow', label = 'Line of best fit, scaled simulated data')
 
-#plt.title('M25 between J9 and J10', fontsize = 15)
-plt.xlabel('Number of Cars on Road', fontsize = 15)
-plt.ylabel('Average Speed of Cars (km/h)', fontsize = 15)
-ax.legend()
+#plt.title('M25 between J9 and J10')
+plt.xlabel('Number of Cars on Road', fontsize=60)
+plt.ylabel('Average Speed of Cars (km/h)', fontsize=60)
+ax.legend(loc='upper right')
 
-fig.savefig('Motorway data', bbox_inches = 'tight')
+fig.savefig(f'fig/Motorway data-M25.pdf', format='pdf', bbox_inches = 'tight')
 
